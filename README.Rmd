@@ -1,0 +1,129 @@
+---
+title: "Infer Help"
+output:
+  html_document: 
+    code_folding: show
+    toc: yes
+    toc_float: yes
+    toc_depth: 4
+    theme: yeti
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = F)
+```
+
+We conduct simulation-based inference using the `tidymodels` package in R. `tidymodels` a meta package (similar to `tidyverse`), such that mutliple packages are loaded when we run the code below: 
+
+```{r eval = F}
+library(tidymodels)
+```
+
+One of these packages is the `infer` package, which is used to conduct simulation-based inference in R.
+
+# Define inference task
+
+First define the inference task you're doing:
+
+- Confidence interval: To estimate a parameter of interest
+- Hypothesis testing: To assess a claim about a population parameter
+
+## Confidence intervals
+
+The general structure of `infer` code to generate the bootstrap distribution for confidence intervals is 
+
+```{r}
+boot_dist <- df %>%
+  specify(...) %>%
+  generate(...) %>%
+  calculate(...)
+```
+
+Let's break down each line of code: 
+
+## `specify`
+
+To determine the arguments for the `specify` function, you need to determine two things: 
+
+1. Are you doing one- or two-sample inference?
+2. Is the primary variable of interest, i.e. the response variable, quantitative or categorical? 
+
+### One-sample inference 
+
+#### Quantitative variable of interest 
+
+If we're conducting one-sample inference for a quantitative variable, `[NUM_VAR]`, we will use the following code: 
+
+```{r}
+specify(response = [NUM_VAR])
+```
+
+#### Categorical variable of interest 
+
+If we're conducting one-sample inference for a categorical variable, `[CAT_VAR]`, we will use the following code:
+
+```{r}
+specify(response = [CAT_VAR], success = "CATEGORY")
+```
+
+where "CATEGORY" is the specific category of the variable we're studying.
+
+
+### Two-sample inference
+
+#### Quantitative response + Categorical grouping variable
+
+If we're conducting two-sample inference for a quantitative variable of interest, `[NUM_VAR]`, with a categorical variable defining the groups, `[CAT_VAR]`, we use the following code:
+
+```{r}
+specify(response = [NUM_VAR], explanatory = [CAT_VAR])
+```
+
+#### Categorical response + Categorical grouping variable
+
+If we're conducting two-sample inference for a categorical variable of interest, `[CAT_VAR1]`, with a categorical variable defining the groups, `[CAT_VAR2]`, we use the following code:
+
+```{r}
+specify(response = [CAT_VAR1], explanatory = [CAT_VAR2], success = "CATEGORY1")
+```
+
+where "CATEGORY1" is the category of `[CAT_VAR1]` we're analyzing.
+
+#### Two quantitative variables
+
+If we're conducting two-sample inference for the association between two quantitative variables, `[NUM_VAR1]`, with a categorical variable defining the groups, `[NUM_VAR2]`, we use the following code:
+
+```{r}
+specify(response = [NUM_VAR1], explanatory = [NUM_VAR2])
+```
+
+\newpage 
+
+## `generate`
+
+Since the goal of the confidence interval is to use the sample data to estimate a plausible range of values the parameter can take, we will use the code below to indicate we want to take a bootstrap sample of the data:
+
+```{r}
+generate(reps = N, type = "bootstrap")
+```
+
+where `N` is the number of reps you want to use to generate the bootstrap distribution. 
+
+
+## `calculate`
+
+This is where we define the statistic to calculate in each iteration. 
+
+```{r}
+calculate(stat = "_______")
+```
+
+For example, if we're constructing a confidence interval for the population mean, we will use the code below:
+
+```{r}
+calculate(stat = "mean")
+```
+
+Type `??infer::calculate` in the console to see the options for statistics that we can calculate.
+
+
